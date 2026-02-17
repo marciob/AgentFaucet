@@ -383,3 +383,9 @@ pyrightconfig.json
 # yarn v2
 
 # End of https://www.toptal.com/developers/gitignore/api/node,python,solidity
+
+### Foundry ###
+contracts/cache/
+contracts/out/
+contracts/broadcast/
+!contracts/lib/
