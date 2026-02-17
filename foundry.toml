@@ -1,0 +1,11 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+solc_version = "0.8.24"
+remappings = [
+    "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+]
+
+[rpc_endpoints]
+bnb_testnet = "https://data-seed-prebsc-1-s1.bnbchain.org:8545"
