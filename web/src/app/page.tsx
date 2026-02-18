@@ -9,6 +9,7 @@ type Audience = "human" | "agent";
 
 export default function Home() {
   const [audience, setAudience] = useState<Audience>("agent");
+  const [copied, setCopied] = useState(false);
   const supabase = createSupabaseBrowserClient();
 
   const handleGetStarted = async () => {
@@ -97,26 +98,22 @@ export default function Home() {
           </p>
 
           {/* Copyable command box */}
-          <div className="group relative rounded-xl border border-accent/30 bg-[#0d1117] p-5">
-            <button
-              onClick={() => {
-                const text = `Read ${baseUrl}/agents.md and follow the instructions to claim tBNB`;
-                navigator.clipboard.writeText(text);
-                const el = document.getElementById("copy-feedback");
-                if (el) {
-                  el.textContent = "Copied!";
-                  setTimeout(() => { el.textContent = "Click to copy"; }, 2000);
-                }
-              }}
-              className="absolute top-3 right-3 rounded-md border border-card-border bg-card px-2.5 py-1 text-xs text-muted opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100"
-              id="copy-feedback"
-            >
-              Click to copy
-            </button>
-            <p className="font-mono text-sm leading-relaxed select-all">
+          <button
+            onClick={() => {
+              const text = `Read ${baseUrl}/agents.md and follow the instructions to claim tBNB`;
+              navigator.clipboard.writeText(text);
+              setCopied(true);
+              setTimeout(() => setCopied(false), 2000);
+            }}
+            className="group relative w-full cursor-pointer rounded-xl border border-accent/30 bg-[#0d1117] p-5 text-left transition-colors hover:border-accent/50"
+          >
+            <span className="absolute top-3 right-3 rounded-md border border-card-border bg-card px-2.5 py-1 text-xs text-muted transition-opacity group-hover:opacity-100 opacity-0">
+              {copied ? "Copied!" : "Click to copy"}
+            </span>
+            <p className="font-mono text-sm leading-relaxed">
               Read {baseUrl}/agents.md and follow the instructions to claim tBNB
             </p>
-          </div>
+          </button>
         </section>
       )}
 
