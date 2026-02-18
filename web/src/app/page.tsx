@@ -85,40 +85,20 @@ export default function Home() {
                     {user.user_metadata?.user_name}
                   </span>
                 </p>
-                <div className="flex gap-4">
-                  <a
-                    href="/dashboard"
-                    className="rounded-lg bg-accent px-6 py-3 font-medium text-black transition-colors hover:bg-accent-hover"
-                  >
-                    Go to Dashboard
-                  </a>
-                  <a
-                    href="https://github.com/marciob/AgentFaucet"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="rounded-lg border border-card-border px-6 py-3 font-medium transition-colors hover:bg-card"
-                  >
-                    View on GitHub
-                  </a>
-                </div>
-              </>
-            ) : (
-              <div className="flex gap-4">
-                <button
-                  onClick={handleGetStarted}
+                <a
+                  href="/dashboard"
                   className="rounded-lg bg-accent px-6 py-3 font-medium text-black transition-colors hover:bg-accent-hover"
                 >
-                  Get started
-                </button>
-                <a
-                  href="https://github.com/marciob/AgentFaucet"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="rounded-lg border border-card-border px-6 py-3 font-medium transition-colors hover:bg-card"
-                >
-                  View on GitHub
+                  Go to Dashboard
                 </a>
-              </div>
+              </>
+            ) : (
+              <button
+                onClick={handleGetStarted}
+                className="rounded-lg bg-accent px-6 py-3 font-medium text-black transition-colors hover:bg-accent-hover"
+              >
+                Get started
+              </button>
             )}
           </section>
           <HowItWorks />
