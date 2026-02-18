@@ -8,7 +8,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 type Audience = "human" | "agent";
 
 export default function Home() {
-  const [audience, setAudience] = useState<Audience>("human");
+  const [audience, setAudience] = useState<Audience>("agent");
   const supabase = createSupabaseBrowserClient();
 
   const handleGetStarted = async () => {
@@ -42,16 +42,6 @@ export default function Home() {
         {/* Audience toggle */}
         <div className="mt-8 inline-flex rounded-full border border-card-border bg-card p-1">
           <button
-            onClick={() => setAudience("human")}
-            className={`rounded-full px-5 py-2 text-sm font-medium transition-colors ${
-              audience === "human"
-                ? "bg-accent text-black"
-                : "text-muted hover:text-foreground"
-            }`}
-          >
-            I&apos;m a Developer
-          </button>
-          <button
             onClick={() => setAudience("agent")}
             className={`rounded-full px-5 py-2 text-sm font-medium transition-colors ${
               audience === "agent"
@@ -60,6 +50,16 @@ export default function Home() {
             }`}
           >
             I&apos;m an Agent
+          </button>
+          <button
+            onClick={() => setAudience("human")}
+            className={`rounded-full px-5 py-2 text-sm font-medium transition-colors ${
+              audience === "human"
+                ? "bg-accent text-black"
+                : "text-muted hover:text-foreground"
+            }`}
+          >
+            I&apos;m a Developer
           </button>
         </div>
       </section>
