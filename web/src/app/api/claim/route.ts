@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
 
     const claimAmount = amount
       ? parseEther(String(amount))
-      : parseEther("0.1");
+      : parseEther("0.005");
 
     // Check daily rate limit
     const serviceClient = createSupabaseServiceClient();

@@ -27,10 +27,10 @@ interface ReputationResult {
 }
 
 const TIER_LIMITS: Record<number, string> = {
-  1: "500000000000000000",   // 0.5 tBNB
-  2: "2000000000000000000",  // 2 tBNB
-  3: "5000000000000000000",  // 5 tBNB
-  4: "10000000000000000000", // 10 tBNB
+  1: "5000000000000000",   // 0.005 tBNB
+  2: "10000000000000000",  // 0.01 tBNB
+  3: "15000000000000000",  // 0.015 tBNB
+  4: "20000000000000000",  // 0.02 tBNB
 };
 
 function getTier(score: number): number {
