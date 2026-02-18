@@ -4,7 +4,7 @@ set -euo pipefail
 # AgentFaucet — Check allocation status
 # Usage: bash status.sh
 
-BASE_URL="${FAUCET_URL:-http://localhost:3000}"
+BASE_URL="${FAUCET_URL:-https://agentfaucet.app}"
 TOKEN="${FAUCET_TOKEN:?FAUCET_TOKEN environment variable is required}"
 
 response=$(curl -s -w "\n%{http_code}" \
