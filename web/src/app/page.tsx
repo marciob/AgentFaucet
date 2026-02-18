@@ -1,7 +1,21 @@
+"use client";
+
 import { HowItWorks } from "@/components/how-it-works";
 import { PoolStats } from "@/components/pool-stats";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export default function Home() {
+  const supabase = createSupabaseBrowserClient();
+
+  const handleGetStarted = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: "github",
+      options: {
+        redirectTo: `${window.location.origin}/api/auth/callback`,
+      },
+    });
+  };
+
   return (
     <main>
       {/* Hero */}
@@ -18,7 +32,10 @@ export default function Home() {
           gasless claims, powered by ERC-8004 identity on BNB Chain.
         </p>
         <div className="mt-8 flex gap-4">
-          <button className="rounded-lg bg-accent px-6 py-3 font-medium text-black transition-colors hover:bg-accent-hover">
+          <button
+            onClick={handleGetStarted}
+            className="rounded-lg bg-accent px-6 py-3 font-medium text-black transition-colors hover:bg-accent-hover"
+          >
             Get started
           </button>
           <a
