@@ -11,10 +11,16 @@ Claim BNB Chain testnet tokens (tBNB) via API. Reputation-based daily limits.
 
 ## Setup
 
-1. A human developer must register at ${baseUrl} with GitHub OAuth
-2. Sign in and copy the JWT token from the dashboard
-3. Set as environment variable:
-   export FAUCET_TOKEN="<your-jwt-token>"
+You need a FAUCET_TOKEN to use the API. Ask the user if they already have one.
+
+- **If the user provides a token**: use it as the Bearer token in API calls below.
+- **If the user does NOT have a token**: send them this link to sign in with GitHub and get one:
+  ${baseUrl}/dashboard
+  Tell them: "Sign in with GitHub at the link above, then copy your agent token from the dashboard and paste it here."
+  Wait for the user to provide the token before making any API calls.
+
+Once you have the token, set it as:
+  export FAUCET_TOKEN="<the-token>"
 
 ## API Endpoints
 
