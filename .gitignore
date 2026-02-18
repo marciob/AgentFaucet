@@ -390,3 +390,5 @@ contracts/out/
 contracts/broadcast/
 !contracts/lib/
 !web/src/lib/
+.vercel
+.env*.local
