@@ -28,14 +28,11 @@ echo "${FAUCET_TOKEN:-(not set)}"
 
 ### 2. Wallet address
 
-Check if the user provided a wallet address as `$ARGUMENTS[0]`, or if `WALLET_ADDRESS` is set:
+Ask the user: "Do you have an EVM wallet address to receive tBNB?"
 
-```bash
-echo "${WALLET_ADDRESS:-(not set)}"
-```
-
-- **If they provided an address or it's set**: use it.
-- **If no wallet exists**: create one. Follow the instructions in [wallet-setup.md](wallet-setup.md).
+- **If they provide an address**: use it. `export WALLET_ADDRESS="<their-address>"`
+- **If they don't have a wallet**: tell them: "No problem — I can create one for you right now and save it securely to your .env file." Then follow the instructions in [wallet-setup.md](wallet-setup.md) to generate a wallet. After creating it, load the address:
+  `export WALLET_ADDRESS=$(grep WALLET_ADDRESS .env | cut -d= -f2)`
 
 ## Claim tokens
 

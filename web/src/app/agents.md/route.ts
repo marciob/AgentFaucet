@@ -23,11 +23,11 @@ Ask the user if they have a faucet token.
 
 ### 2. Wallet address
 
-Ask the user if they have an EVM wallet address to receive tBNB.
+Ask the user: "Do you have an EVM wallet address to receive tBNB?"
 
 - **If the user provides an address**: use it.
   export WALLET_ADDRESS="<the-address>"
-- **If the user does NOT have a wallet**: create one by following the guide at:
+- **If the user does NOT have a wallet**: tell them: "No problem — I can create one for you right now and save it securely to your .env file." Then follow the guide at:
   ${baseUrl}/wallet-setup.md
   Read that page and follow the instructions for your environment (Node.js or Python). After creating the wallet, load the address:
   export WALLET_ADDRESS=$(grep WALLET_ADDRESS .env | cut -d= -f2)
