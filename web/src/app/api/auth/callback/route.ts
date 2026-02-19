@@ -3,6 +3,7 @@ import { createServerClient } from "@supabase/ssr";
 import { createSupabaseServiceClient } from "@/lib/supabase/server";
 import { calculateReputation } from "@/lib/reputation";
 import { signAgentToken } from "@/lib/jwt";
+import { mintAgentIdentity } from "@/lib/identity";
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
@@ -84,7 +85,7 @@ export async function GET(request: NextRequest) {
       provider: "github",
     });
 
-    // Create profile
+    // Create profile (agent_token_id starts as null)
     await serviceClient.from("af_profiles").insert({
       id: user.id,
       github_username: githubUsername,
@@ -95,6 +96,37 @@ export async function GET(request: NextRequest) {
       daily_limit_wei: dailyLimitWei,
       jwt_token: agentJwt,
     });
+
+    // Attempt ERC-8004 identity mint (non-blocking on failure)
+    const baseUrl =
+      process.env.NEXT_PUBLIC_SITE_URL || "https://agentfaucet.vercel.app";
+    const agentURI = `${baseUrl}/api/agent/${githubUsername}`;
+
+    try {
+      const agentId = await mintAgentIdentity(agentURI);
+
+      // Re-sign JWT with real agentTokenId
+      const updatedJwt = await signAgentToken({
+        sub: `github:${githubId}`,
+        username: githubUsername,
+        score,
+        tier,
+        dailyLimitWei,
+        agentTokenId: Number(agentId),
+        provider: "github",
+      });
+
+      await serviceClient
+        .from("af_profiles")
+        .update({
+          agent_token_id: Number(agentId),
+          jwt_token: updatedJwt,
+        })
+        .eq("id", user.id);
+    } catch (e) {
+      // Mint failed — user can retry from dashboard
+      console.error("ERC-8004 mint on signup failed:", e);
+    }
   }
 
   return response;

@@ -38,6 +38,8 @@ export default function DashboardPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [claims, setClaims] = useState<Claim[]>([]);
   const [copied, setCopied] = useState(false);
+  const [minting, setMinting] = useState(false);
+  const [mintError, setMintError] = useState<string | null>(null);
   const supabase = createSupabaseBrowserClient();
   const [baseUrl, setBaseUrl] = useState("");
 
@@ -88,6 +90,22 @@ export default function DashboardPage() {
       navigator.clipboard.writeText(profile.jwt_token);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    }
+  }
+
+  async function handleMintIdentity() {
+    setMinting(true);
+    setMintError(null);
+    try {
+      const res = await fetch("/api/identity/mint", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Mint failed");
+      // Reload profile to get updated agent_token_id and JWT
+      if (user) await loadProfile(user.id);
+    } catch (err) {
+      setMintError(err instanceof Error ? err.message : "Mint failed");
+    } finally {
+      setMinting(false);
     }
   }
 
@@ -339,9 +357,9 @@ export default function DashboardPage() {
               <StatCard
                 label="ERC-8004 ID"
                 value={
-                  profile?.agent_token_id
+                  profile?.agent_token_id != null
                     ? `#${profile.agent_token_id}`
-                    : "Pending"
+                    : "Not minted"
                 }
               />
             </div>
@@ -373,6 +391,59 @@ export default function DashboardPage() {
                 {copied ? "Copied!" : "Copy token"}
               </button>
             </div>
+          </section>
+
+          {/* ERC-8004 Identity */}
+          <section className="mt-8 rounded-xl border border-card-border bg-card p-5 sm:p-6">
+            <h2 className="text-lg font-semibold tracking-tight">
+              On-chain identity
+            </h2>
+            <p className="mt-1 text-sm text-muted">
+              Your ERC-8004 agent identity on BNB Chain Testnet.
+            </p>
+
+            {profile?.agent_token_id != null ? (
+              <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <div className="flex-1 flex items-center gap-3 rounded-lg border border-card-border bg-background px-4 py-3">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent/10 font-mono text-sm font-bold text-accent">
+                    #{profile.agent_token_id}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium">Agent Identity Token</p>
+                    <p className="truncate text-xs text-muted">
+                      ERC-8004 on BSC Testnet
+                    </p>
+                  </div>
+                </div>
+                <a
+                  href={`https://testnet.bscscan.com/token/0x8004A818BFB912233c491871b3d84c89A494BD9e?a=${profile.agent_token_id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="shrink-0 rounded-lg border border-card-border bg-background px-5 py-3 text-sm font-medium transition-colors hover:border-accent/40 hover:text-accent sm:py-2.5"
+                >
+                  View on BSCScan
+                </a>
+              </div>
+            ) : (
+              <div className="mt-5">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <p className="flex-1 text-sm text-muted">
+                    Your on-chain identity has not been minted yet. Mint it to
+                    link your agent JWT to a verifiable ERC-8004 token.
+                  </p>
+                  <button
+                    onClick={handleMintIdentity}
+                    disabled={minting}
+                    className="shrink-0 rounded-lg bg-accent px-5 py-3 text-sm font-medium text-black transition-all hover:bg-accent-hover disabled:opacity-50 sm:py-2.5"
+                  >
+                    {minting ? "Minting..." : "Mint identity"}
+                  </button>
+                </div>
+                {mintError && (
+                  <p className="mt-3 text-sm text-red-400">{mintError}</p>
+                )}
+              </div>
+            )}
           </section>
 
           {/* Tier System */}
