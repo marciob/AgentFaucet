@@ -17,6 +17,9 @@ export const metadata: Metadata = {
   title: "AgentFaucet — Testnet Tokens for AI Agents",
   description:
     "Developer-reputation-based testnet token distribution for AI agents on BNB Chain",
+  icons: {
+    icon: "/logo.svg",
+  },
 };
 
 export default function RootLayout({

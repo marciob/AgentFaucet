@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
+  <!-- Robot head -->
+  <rect x="8" y="10" width="24" height="19" rx="5" fill="none" stroke="#F0B90B" stroke-width="2.2"/>
+
+  <!-- Eyes -->
+  <circle cx="15.5" cy="19" r="2.8" fill="#F0B90B"/>
+  <circle cx="24.5" cy="19" r="2.8" fill="#F0B90B"/>
+
+  <!-- Mouth -->
+  <line x1="15" y1="25" x2="25" y2="25" stroke="#F0B90B" stroke-width="1.8" stroke-linecap="round"/>
+
+  <!-- Antenna stem -->
+  <line x1="20" y1="10" x2="20" y2="4" stroke="#F0B90B" stroke-width="1.8" stroke-linecap="round"/>
+
+  <!-- Antenna droplet (BNB gold water drop) -->
+  <path d="M20 1 Q20 1 17.5 4.5 Q16 6.5 17.5 8 Q18.5 9 20 9 Q21.5 9 22.5 8 Q24 6.5 22.5 4.5 Z" fill="#F0B90B"/>
+
+  <!-- Ears -->
+  <rect x="3" y="16" width="4" height="7" rx="2" fill="#F0B90B" opacity="0.5"/>
+  <rect x="33" y="16" width="4" height="7" rx="2" fill="#F0B90B" opacity="0.5"/>
+</svg>
