@@ -102,14 +102,14 @@ export function Navbar() {
                 Sign out
               </button>
             </div>
-          ) : (
+          ) : pathname !== "/sponsor" ? (
             <button
               onClick={handleLogin}
               className="ml-3 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-black transition-all hover:bg-accent-hover"
             >
               Sign in with GitHub
             </button>
-          )}
+          ) : null}
         </div>
 
         {/* ── Mobile Hamburger ─────────────────────────── */}
@@ -188,14 +188,14 @@ export function Navbar() {
                 Sign out
               </button>
             </div>
-          ) : (
+          ) : pathname !== "/sponsor" ? (
             <button
               onClick={handleLogin}
               className="w-full rounded-lg bg-accent py-2.5 text-sm font-medium text-black transition-colors hover:bg-accent-hover"
             >
               Sign in with GitHub
             </button>
-          )}
+          ) : null}
         </div>
       </div>
     </nav>
