@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServiceClient } from "@/lib/supabase/server";
 
+const TIER_NAMES: Record<number, string> = {
+  1: "Newcomer",
+  2: "Developer",
+  3: "Active Builder",
+  4: "Established",
+};
+
 /**
  * GET /api/agent/:username
  *
- * Serves the ERC-8004 agent registration file (agentURI content).
- * This is the JSON-LD document that the on-chain tokenURI points to.
- * Dynamic HTTPS endpoint — no IPFS needed.
+ * Serves ERC-721 compatible metadata for the ERC-8004 agent identity NFT.
+ * The on-chain tokenURI points here. BSCScan and NFT platforms read this.
  */
 export async function GET(
   request: NextRequest,
@@ -29,50 +35,39 @@ export async function GET(
 
   const origin = new URL(request.url).origin;
 
-  const agentFile = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareAgent",
+  // ERC-721 metadata standard — this is what BSCScan/OpenSea read
+  const metadata = {
     name: `AgentFaucet: ${profile.github_username}`,
-    description: `AI agent identity for ${profile.github_username} on AgentFaucet (BNB Chain Testnet)`,
-    image: `${origin}/agent-nft.svg`,
-    identifier: profile.agent_token_id
-      ? `erc8004:bsc-testnet:${profile.agent_token_id}`
-      : null,
-    provider: {
-      "@type": "Organization",
-      name: "AgentFaucet",
-      url: origin,
-    },
-    additionalProperty: [
+    description: `AI agent identity for ${profile.github_username} on AgentFaucet (BNB Chain Testnet). Tier ${profile.tier} — ${TIER_NAMES[profile.tier] || "Unknown"}. Reputation score: ${profile.reputation_score}/100.`,
+    image: `${origin}/agent-nft.png`,
+    external_url: `${origin}/dashboard`,
+    attributes: [
       {
-        "@type": "PropertyValue",
-        name: "githubUsername",
+        trait_type: "GitHub Username",
         value: profile.github_username,
       },
       {
-        "@type": "PropertyValue",
-        name: "githubId",
-        value: profile.github_id,
-      },
-      {
-        "@type": "PropertyValue",
-        name: "reputationScore",
+        trait_type: "Reputation Score",
         value: profile.reputation_score,
+        max_value: 100,
       },
       {
-        "@type": "PropertyValue",
-        name: "tier",
-        value: profile.tier,
+        trait_type: "Tier",
+        value: TIER_NAMES[profile.tier] || `Tier ${profile.tier}`,
       },
       {
-        "@type": "PropertyValue",
-        name: "chain",
-        value: "bsc-testnet",
+        trait_type: "Chain",
+        value: "BNB Chain Testnet",
+      },
+      {
+        display_type: "number",
+        trait_type: "Token ID",
+        value: profile.agent_token_id,
       },
     ],
   };
 
-  return NextResponse.json(agentFile, {
+  return NextResponse.json(metadata, {
     headers: {
       "Cache-Control": "public, max-age=300, s-maxage=300",
     },
