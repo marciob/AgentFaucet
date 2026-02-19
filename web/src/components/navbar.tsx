@@ -50,8 +50,7 @@ export function Navbar() {
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/btbnb_2-removebg-preview.png" alt="" width={32} height={32} />
-          <span className="text-xl font-bold text-accent">Agent</span>
-          <span className="text-xl font-bold text-foreground">Faucet</span>
+          <span className="text-xl font-bold"><span className="text-accent">Agent</span><span className="text-foreground">Faucet</span></span>
         </Link>
 
         {/* ── Desktop Nav ──────────────────────────────── */}
