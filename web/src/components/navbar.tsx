@@ -58,7 +58,7 @@ export function Navbar() {
           className="flex items-center gap-2 transition-opacity hover:opacity-80"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.svg" alt="" width={28} height={28} />
+          <img src="/btbnb_2_rbg_2.jpg" alt="" width={32} height={32} className="rounded-md" />
           <span className="text-xl font-bold text-accent">Agent</span>
           <span className="text-xl font-bold text-foreground">Faucet</span>
         </Link>

@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   description:
     "Developer-reputation-based testnet token distribution for AI agents on BNB Chain",
   icons: {
-    icon: "/logo.svg",
+    icon: "/btbnb_2_rbg_2.jpg",
   },
 };
 
