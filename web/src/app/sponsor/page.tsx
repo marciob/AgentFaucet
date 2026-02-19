@@ -211,12 +211,16 @@ export default function SponsorPage() {
 
         {/* Wallet connection */}
         {account ? (
-          <div className="flex items-center gap-2.5 rounded-lg border border-card-border bg-card px-4 py-2.5">
-            <span className="h-2 w-2 rounded-full bg-emerald-400" />
+          <button
+            onClick={() => setAccount(null)}
+            className="group flex items-center gap-2.5 rounded-lg border border-card-border bg-card px-4 py-2.5 transition-all hover:border-red-500/40 hover:bg-red-500/5"
+          >
+            <span className="h-2 w-2 rounded-full bg-emerald-400 group-hover:bg-red-400" />
             <span className="font-mono text-sm">
-              {truncateAddress(account)}
+              <span className="group-hover:hidden">{truncateAddress(account)}</span>
+              <span className="hidden text-red-400 group-hover:inline">Disconnect</span>
             </span>
-          </div>
+          </button>
         ) : (
           <button
             onClick={handleConnect}
