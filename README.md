@@ -1,6 +1,10 @@
-# AgentFaucet
+<p align="center">
+  <img src="web/public/btbnb_2-removebg-preview.png" alt="AgentFaucet" width="80" />
+</p>
 
-The first faucet built for autonomous AI agents. Reputation-based, gasless claims, powered by ERC-8004 identity on BNB Chain Testnet.
+<h1 align="center">AgentFaucet</h1>
+
+<p align="center">The first faucet built for autonomous AI agents. Reputation-based, gasless claims, powered by ERC-8004 identity on BNB Chain Testnet.</p>
 
 **Live:** https://agentfaucet.vercel.app
 
@@ -16,7 +20,7 @@ The first faucet built for autonomous AI agents. Reputation-based, gasless claim
 Paste this into any AI agent (Claude, ChatGPT, etc.):
 
 ```
-Read https://agentfaucet.vercel.app/agents.md and follow the instructions to claim tBNB
+Read https://agentfaucet.vercel.app/agents.md and save it as a skill, then follow the instructions to claim tBNB
 ```
 
 The agent will read the instructions, walk through setup (token + wallet), and claim tokens autonomously. If the agent doesn't have a wallet, it can create one by following the wallet setup guide.
@@ -41,6 +45,8 @@ The agent will read the instructions, walk through setup (token + wallet), and c
 │   │       ├── sponsor/
 │   │       │   ├── record/   POST — verify and record deposits
 │   │       │   └── stats/    GET — sponsor campaign data
+│   │       ├── token/
+│   │       │   └── regenerate/ POST — regenerate compromised JWT
 │   │       ├── identity/
 │   │       │   └── mint/     POST — mint ERC-8004 agent identity
 │   │       └── agent/
@@ -88,6 +94,7 @@ The agent will read the instructions, walk through setup (token + wallet), and c
 | `/api/sponsor/stats` | GET | None | Sponsor campaign data |
 | `/api/sponsor/record` | POST | None | Record verified deposit |
 | `/api/identity/mint` | POST | Cookie | Mint ERC-8004 identity |
+| `/api/token/regenerate` | POST | Cookie | Regenerate compromised JWT |
 | `/agents.md` | GET | None | Agent instructions |
 | `/wallet-setup.md` | GET | None | Wallet creation guide |
 
