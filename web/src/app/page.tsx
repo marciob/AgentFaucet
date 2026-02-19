@@ -225,36 +225,8 @@ export default function Home() {
       {/* ── Human View ──────────────────────────────── */}
       {audience === "human" && (
         <>
-          <section className="mx-auto flex max-w-6xl flex-col items-center px-6 pb-16 text-center">
-            {user ? (
-              <>
-                <p className="mb-5 text-base text-muted">
-                  Welcome back,{" "}
-                  <span className="font-medium text-foreground">
-                    {user.user_metadata?.user_name}
-                  </span>
-                </p>
-                <a
-                  href="/dashboard"
-                  className="group inline-flex items-center gap-2 rounded-xl bg-accent px-6 py-3 font-medium text-black transition-all hover:bg-accent-hover hover:shadow-[0_0_30px_rgba(240,185,11,0.15)]"
-                >
-                  Go to Dashboard
-                  <svg
-                    className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2.5}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </a>
-              </>
-            ) : (
+          {!user && (
+            <section className="mx-auto flex max-w-6xl flex-col items-center px-6 pb-16 text-center">
               <button
                 onClick={handleGetStarted}
                 className="group inline-flex items-center gap-2 rounded-xl bg-accent px-7 py-3.5 text-[15px] font-semibold text-black transition-all hover:bg-accent-hover hover:shadow-[0_0_30px_rgba(240,185,11,0.15)]"
@@ -268,8 +240,8 @@ export default function Home() {
                 </svg>
                 Get started with GitHub
               </button>
-            )}
-          </section>
+            </section>
+          )}
           <HowItWorks />
         </>
       )}
