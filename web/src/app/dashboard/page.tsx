@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { StatCard } from "@/components/stat-card";
 import type { User } from "@supabase/supabase-js";
+
+type Audience = "human" | "agent";
 
 interface Profile {
   github_username: string;
@@ -34,11 +36,25 @@ export default function DashboardPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [claims, setClaims] = useState<Claim[]>([]);
   const [copied, setCopied] = useState(false);
+  const [copiedPrompt, setCopiedPrompt] = useState(false);
   const [activeTab, setActiveTab] = useState<"curl" | "python" | "node">(
     "curl"
   );
+  const [audience, setAudience] = useState<Audience>("human");
   const supabase = createSupabaseBrowserClient();
   const [baseUrl, setBaseUrl] = useState("");
+
+  // Sliding pill indicator
+  const agentRef = useRef<HTMLButtonElement>(null);
+  const humanRef = useRef<HTMLButtonElement>(null);
+  const [pill, setPill] = useState({ left: 0, width: 0 });
+
+  useEffect(() => {
+    const el = audience === "agent" ? agentRef.current : humanRef.current;
+    if (el) {
+      setPill({ left: el.offsetLeft, width: el.offsetWidth });
+    }
+  }, [audience]);
 
   useEffect(() => {
     setBaseUrl(window.location.origin);
@@ -172,14 +188,102 @@ console.log(data);
   // ── Authenticated ────────────────────────────────
   return (
     <main className="mx-auto max-w-6xl px-6 py-12 sm:py-16">
-      {/* Header */}
-      <div className="animate-in">
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="mt-1.5 text-muted">
-          Welcome back,{" "}
-          {profile?.github_username || user.user_metadata?.user_name}
-        </p>
+      {/* Header + Toggle */}
+      <div className="animate-in flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <p className="mt-1.5 text-muted">
+            Welcome back,{" "}
+            {profile?.github_username || user.user_metadata?.user_name}
+          </p>
+        </div>
+
+        {/* Audience toggle */}
+        <div className="relative inline-flex rounded-full border border-card-border/60 bg-card/80 p-1 backdrop-blur-sm">
+          <div
+            className="absolute top-1 bottom-1 rounded-full bg-accent transition-all duration-300 ease-out"
+            style={{ left: pill.left, width: pill.width }}
+          />
+          <button
+            ref={agentRef}
+            onClick={() => setAudience("agent")}
+            className={`relative z-10 rounded-full px-5 py-2 text-sm font-medium transition-colors duration-300 ${
+              audience === "agent"
+                ? "text-black"
+                : "text-muted hover:text-foreground"
+            }`}
+          >
+            I&apos;m an Agent
+          </button>
+          <button
+            ref={humanRef}
+            onClick={() => setAudience("human")}
+            className={`relative z-10 rounded-full px-5 py-2 text-sm font-medium transition-colors duration-300 ${
+              audience === "human"
+                ? "text-black"
+                : "text-muted hover:text-foreground"
+            }`}
+          >
+            I&apos;m a Human
+          </button>
+        </div>
       </div>
+
+      {/* ── Agent View ──────────────────────────────── */}
+      {audience === "agent" && (
+        <section className="mt-10 mx-auto max-w-2xl">
+          <p className="mb-5 text-center text-sm text-muted">
+            Copy this into your AI agent — it will handle the rest.
+          </p>
+
+          <div className="overflow-hidden rounded-xl border border-accent/20 bg-[#0d1117] transition-all duration-300 hover:border-accent/40 hover:shadow-[0_0_60px_rgba(240,185,11,0.06)]">
+            <div className="flex items-center gap-2 border-b border-white/[0.06] px-4 py-2.5">
+              <div className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
+              <div className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
+              <div className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
+              <span className="ml-2 font-mono text-[11px] text-muted/50">
+                prompt
+              </span>
+            </div>
+            <button
+              onClick={() => {
+                const text = `Read ${baseUrl}/agents.md and follow the instructions to claim tBNB`;
+                navigator.clipboard.writeText(text);
+                setCopiedPrompt(true);
+                setTimeout(() => setCopiedPrompt(false), 2000);
+              }}
+              className="group relative w-full p-5 text-left"
+            >
+              <span
+                className={`absolute top-3 right-3 flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs transition-all ${
+                  copiedPrompt
+                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                    : "border-card-border bg-card text-muted opacity-0 group-hover:opacity-100"
+                }`}
+              >
+                {copiedPrompt ? (
+                  <>
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Copied!
+                  </>
+                ) : (
+                  "Click to copy"
+                )}
+              </span>
+              <p className="font-mono text-sm leading-relaxed text-foreground/80">
+                Read {baseUrl}/agents.md and follow the instructions to claim
+                tBNB
+              </p>
+            </button>
+          </div>
+        </section>
+      )}
+
+      {/* ── Human View (Dashboard Content) ──────────── */}
+      {audience === "human" && (
+        <>
 
       {/* ── Stats Grid ──────────────────────────────── */}
       <div className="mt-8 grid gap-4 grid-cols-2 lg:grid-cols-4">
@@ -602,6 +706,9 @@ console.log(data);
           </div>
         )}
       </section>
+
+        </>
+      )}
     </main>
   );
 }
