@@ -2,48 +2,65 @@
 name: agentfaucet
 description: Claim BNB Chain testnet tokens (tBNB) for AI agent wallets. Use when the user needs testnet tokens, wants to fund a wallet on BNB testnet, or mentions AgentFaucet.
 argument-hint: [wallet-address] [amount]
-allowed-tools: Bash(bash *), Bash(curl *)
+allowed-tools: Bash(bash *), Bash(curl *), Bash(node *), Bash(npm *), Bash(chmod *), Bash(grep *)
 ---
 
 # AgentFaucet
 
 Claim tBNB (BNB Chain testnet tokens) via API. Reputation-based daily limits tied to your developer's GitHub profile.
 
-## Prerequisites
+## Setup checklist
 
-- `FAUCET_TOKEN` env var must be set (JWT from the AgentFaucet dashboard)
-- `FAUCET_URL` env var (optional — defaults to `https://agentfaucet.app`)
+Before claiming, you need two things: a **faucet token** and a **wallet address**. Work through these steps in order.
 
-If `FAUCET_TOKEN` is not set, tell the user to sign in at the AgentFaucet dashboard with GitHub and copy the token.
+### 1. Faucet token
+
+Check if `FAUCET_TOKEN` is set:
+
+```bash
+echo "${FAUCET_TOKEN:-(not set)}"
+```
+
+- **If set**: proceed to step 2.
+- **If not set**: ask the user if they have one.
+  - If they provide a token: `export FAUCET_TOKEN="<token>"`
+  - If they don't have one: tell them to sign in at https://agentfaucet.vercel.app/dashboard with GitHub, then copy the agent token and paste it here. Wait for the token before continuing.
+
+### 2. Wallet address
+
+Check if the user provided a wallet address as `$ARGUMENTS[0]`, or if `WALLET_ADDRESS` is set:
+
+```bash
+echo "${WALLET_ADDRESS:-(not set)}"
+```
+
+- **If they provided an address or it's set**: use it.
+- **If no wallet exists**: create one. Follow the instructions in [wallet-setup.md](wallet-setup.md).
 
 ## Claim tokens
 
-Run the bundled script to claim tBNB to a wallet:
+Call the API to claim tBNB:
 
 ```bash
-bash "$(dirname "$0")/../.claude/skills/agentfaucet/scripts/claim.sh" <wallet_address> [amount]
-```
-
-Or call the API directly — this is preferred when the script path is uncertain:
-
-```bash
-curl -s -X POST "${FAUCET_URL:-https://agentfaucet.app}/api/claim" \
+curl -s -X POST "https://agentfaucet.vercel.app/api/claim" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $FAUCET_TOKEN" \
-  -d '{"walletAddress": "$ARGUMENTS[0]", "amount": "${ARGUMENTS[1]:-0.005}"}'
+  -d "{\"walletAddress\": \"$WALLET_ADDRESS\", \"amount\": \"${1:-0.005}\"}"
 ```
 
-If the user provided arguments via `$ARGUMENTS`, use `$ARGUMENTS[0]` as the wallet address and `$ARGUMENTS[1]` as the amount (default `0.005`).
+If the user passed arguments: use `$ARGUMENTS[0]` as wallet address, `$ARGUMENTS[1]` as amount (default `0.005`).
 
 **Success response:**
 ```json
 { "success": true, "txHash": "0x...", "amount": "0.005", "remaining": "0.01" }
 ```
 
+After a successful claim, show the user the txHash and remaining daily allowance.
+
 ## Check status
 
 ```bash
-curl -s "${FAUCET_URL:-https://agentfaucet.app}/api/status" \
+curl -s "https://agentfaucet.vercel.app/api/status" \
   -H "Authorization: Bearer $FAUCET_TOKEN"
 ```
 
@@ -52,10 +69,10 @@ curl -s "${FAUCET_URL:-https://agentfaucet.app}/api/status" \
 { "username": "octocat", "score": 65, "tier": 3, "dailyLimit": "0.015", "claimedToday": "0.005", "remaining": "0.01" }
 ```
 
-## Check pool stats (no auth)
+## Check pool stats (no auth needed)
 
 ```bash
-curl -s "${FAUCET_URL:-https://agentfaucet.app}/api/stats"
+curl -s "https://agentfaucet.vercel.app/api/stats"
 ```
 
 ## Tiers
@@ -67,16 +84,19 @@ curl -s "${FAUCET_URL:-https://agentfaucet.app}/api/stats"
 | 3    | 51–80 | 0.015 tBNB  |
 | 4    | 81+   | 0.02 tBNB   |
 
-## Errors
+## Error handling
 
 | Status | Meaning | What to do |
 |--------|---------|------------|
-| 401 | Invalid/expired token | Tell user to re-authenticate at the dashboard |
-| 404 | Profile not found | Tell user to sign in via GitHub OAuth first |
-| 429 | Daily limit reached | Wait until UTC midnight |
-| 400 | Invalid address | Check the wallet address format |
+| 400 | Invalid address | Check the wallet address format (must be 0x + 40 hex chars) |
+| 401 | Invalid/expired token | Ask user to re-authenticate at the dashboard |
+| 404 | Profile not found | Ask user to sign in via GitHub OAuth first |
+| 429 | Daily limit reached | Show remaining limit, tell user to wait until UTC midnight |
+| 500 | Server error | Retry once, then report the error |
 
 ## Security
 
-- Never log or expose `FAUCET_TOKEN` in output.
-- Tokens expire after 30 days.
+- Never log or expose `FAUCET_TOKEN` in output
+- Never log or expose `WALLET_PRIVATE_KEY` in output
+- Store secrets in `.env` with `chmod 600` permissions
+- Tokens expire after 30 days

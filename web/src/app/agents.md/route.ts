@@ -1,152 +1,91 @@
 import { NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
-  const host = request.headers.get("host") || "agentfaucet.app";
+  const host = request.headers.get("host") || "agentfaucet.vercel.app";
   const proto = request.headers.get("x-forwarded-proto") || "https";
   const baseUrl = `${proto}://${host}`;
 
   const markdown = `# AgentFaucet
 
-Claim BNB Chain testnet tokens (tBNB) via API. Reputation-based daily limits.
+Claim tBNB (BNB Chain testnet tokens) via API. Reputation-based daily limits tied to your developer's GitHub profile.
 
-## Setup
+## Setup checklist
 
-You need two things: a **FAUCET_TOKEN** and a **wallet address**.
+Before claiming, you need two things: a **faucet token** and a **wallet address**. Work through these steps in order.
 
-### 1. Faucet Token
+### 1. Faucet token
 
-Ask the user if they already have a faucet token.
+Ask the user if they have a faucet token.
 
 - **If the user provides a token**: use it as the Bearer token in API calls below.
-- **If the user does NOT have a token**: send them this link to sign in with GitHub and get one:
-  ${baseUrl}/dashboard
-  Tell them: "Sign in with GitHub at the link above, then copy your agent token from the dashboard and paste it here."
-  Wait for the user to provide the token before making any API calls.
-
-Once you have the token, set it as:
   export FAUCET_TOKEN="<the-token>"
+- **If the user does NOT have a token**: tell them to sign in at ${baseUrl}/dashboard with GitHub, then copy the agent token and paste it here. Wait for the token before continuing.
 
-### 2. Wallet Address
+### 2. Wallet address
 
 Ask the user if they have an EVM wallet address to receive tBNB.
 
-- **If the user provides an address**: use it as the walletAddress in the claim request.
+- **If the user provides an address**: use it.
+  export WALLET_ADDRESS="<the-address>"
 - **If the user does NOT have a wallet**: create one by following the guide at:
   ${baseUrl}/wallet-setup.md
-  Read that page and follow the instructions for your environment (Node.js, Python, or Foundry).
-  After creating the wallet, load the address:
-  export WALLET_ADDRESS="<the-address-from-.env>"
+  Read that page and follow the instructions for your environment (Node.js or Python). After creating the wallet, load the address:
+  export WALLET_ADDRESS=$(grep WALLET_ADDRESS .env | cut -d= -f2)
 
-## API Endpoints
+## Claim tokens
 
-### POST ${baseUrl}/api/claim
+Call the API to claim tBNB:
 
-Claim testnet tBNB. Requires authentication.
+curl -s -X POST "${baseUrl}/api/claim" \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer $FAUCET_TOKEN" \\
+  -d '{"walletAddress": "'$WALLET_ADDRESS'", "amount": "0.005"}'
 
-**Headers:**
-  Authorization: Bearer $FAUCET_TOKEN
-  Content-Type: application/json
-
-**Request body:**
-  {
-    "walletAddress": "0xYourWalletAddress",
-    "amount": "0.005"
-  }
-
-- walletAddress (required): A valid EVM address to receive tBNB
-- amount (optional): Amount in tBNB to claim. Defaults to "0.005". Must not exceed your daily remaining limit.
+- walletAddress (required): A valid EVM address (0x + 40 hex chars)
+- amount (optional): Amount in tBNB. Defaults to "0.005". Must not exceed your daily limit.
 
 **Success response (200):**
-  {
-    "success": true,
-    "txHash": "0xabc123...",
-    "amount": "0.005",
-    "remaining": "0.01"
-  }
+  { "success": true, "txHash": "0x...", "amount": "0.005", "remaining": "0.01" }
 
-**Error responses:**
-- 400: Invalid wallet address
-- 401: Missing or invalid token
-- 404: Profile not found (register at ${baseUrl} first)
-- 429: Daily rate limit exceeded (response includes remaining/limit details)
+After a successful claim, show the user the txHash and remaining daily allowance.
 
----
+## Check status
 
-### GET ${baseUrl}/api/status
+curl -s "${baseUrl}/api/status" \\
+  -H "Authorization: Bearer $FAUCET_TOKEN"
 
-Check your current tier, daily limit, and remaining allowance. Requires authentication.
+**Response:**
+  { "username": "octocat", "score": 65, "tier": 3, "dailyLimit": "0.015", "claimedToday": "0.005", "remaining": "0.01" }
 
-**Headers:**
-  Authorization: Bearer $FAUCET_TOKEN
+## Check pool stats (no auth needed)
 
-**Success response (200):**
-  {
-    "username": "octocat",
-    "score": 65,
-    "tier": 3,
-    "dailyLimit": "0.015",
-    "claimedToday": "0.005",
-    "remaining": "0.01",
-    "totalClaims": 12
-  }
-
----
-
-### GET ${baseUrl}/api/stats
-
-Public endpoint — no authentication required. Returns pool-wide statistics.
-
-**Success response (200):**
-  {
-    "poolBalance": "0.5",
-    "totalClaims": 42,
-    "uniqueDevelopers": 15,
-    "totalDistributed": "0.21",
-    "totalReturned": "0.05"
-  }
+curl -s "${baseUrl}/api/stats"
 
 ## Tiers
 
-Your tier is determined by your GitHub reputation score:
+| Tier | Score | Daily Limit |
+|------|-------|-------------|
+| 1    | 0–20  | 0.005 tBNB  |
+| 2    | 21–50 | 0.01 tBNB   |
+| 3    | 51–80 | 0.015 tBNB  |
+| 4    | 81+   | 0.02 tBNB   |
 
-| Tier | Score Range | Daily Limit |
-|------|-------------|-------------|
-| 1    | 0–20        | 0.005 tBNB  |
-| 2    | 21–50       | 0.01 tBNB   |
-| 3    | 51–80       | 0.015 tBNB  |
-| 4    | 81+         | 0.02 tBNB   |
+## Error handling
 
-## Error Codes
+| Status | Meaning | What to do |
+|--------|---------|------------|
+| 400 | Invalid address | Check the wallet address format (must be 0x + 40 hex chars) |
+| 401 | Invalid/expired token | Ask user to re-authenticate at the dashboard |
+| 404 | Profile not found | Ask user to sign in via GitHub OAuth first |
+| 429 | Daily limit reached | Show remaining limit, tell user to wait until UTC midnight |
+| 500 | Server error | Retry once, then report the error |
 
-| Status | Meaning                              |
-|--------|--------------------------------------|
-| 400    | Invalid wallet address               |
-| 401    | Missing or invalid authorization     |
-| 404    | Profile not found — register first   |
-| 429    | Daily rate limit exceeded            |
-| 500    | Internal server error                |
+## Security
 
-## Example (Python)
-
-import requests, os
-
-resp = requests.post(
-    "${baseUrl}/api/claim",
-    json={"walletAddress": "0xYourAddress", "amount": "0.005"},
-    headers={"Authorization": f"Bearer {os.environ['FAUCET_TOKEN']}"}
-)
-print(resp.json())
-
-## Example (curl)
-
-curl -X POST ${baseUrl}/api/claim \\
-  -H "Authorization: Bearer $FAUCET_TOKEN" \\
-  -H "Content-Type: application/json" \\
-  -d '{"walletAddress": "0xYourAddress", "amount": "0.005"}'
-
-## Source
-
-GitHub: https://github.com/marciob/AgentFaucet
+- Never log or expose FAUCET_TOKEN in output
+- Never log or expose WALLET_PRIVATE_KEY in output
+- Store secrets in .env with chmod 600 permissions
+- Tokens expire after 30 days
 `;
 
   return new Response(markdown, {
