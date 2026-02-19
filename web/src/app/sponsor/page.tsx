@@ -33,6 +33,7 @@ interface Stats {
 
 export default function SponsorPage() {
   const [account, setAccount] = useState<Address | null>(null);
+  const [walletReady, setWalletReady] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [stats, setStats] = useState<Stats | null>(null);
   const [amount, setAmount] = useState("");
@@ -40,6 +41,26 @@ export default function SponsorPage() {
   const [depositing, setDepositing] = useState(false);
   const [txStatus, setTxStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // MetaMask injects window.ethereum async — poll briefly after mount
+  useEffect(() => {
+    if (hasInjectedWallet()) {
+      setWalletReady(true);
+      return;
+    }
+    // Check a few times in case injection is delayed
+    let attempts = 0;
+    const id = setInterval(() => {
+      attempts++;
+      if (hasInjectedWallet()) {
+        setWalletReady(true);
+        clearInterval(id);
+      } else if (attempts >= 10) {
+        clearInterval(id);
+      }
+    }, 200);
+    return () => clearInterval(id);
+  }, []);
 
   const fetchStats = useCallback(async (address?: string) => {
     const url = address
@@ -199,10 +220,10 @@ export default function SponsorPage() {
         ) : (
           <button
             onClick={handleConnect}
-            disabled={connecting || !hasInjectedWallet()}
+            disabled={connecting || !walletReady}
             className="shrink-0 rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-black transition-all hover:bg-accent-hover disabled:opacity-50"
           >
-            {!hasInjectedWallet()
+            {!walletReady
               ? "No wallet detected"
               : connecting
                 ? "Connecting..."
