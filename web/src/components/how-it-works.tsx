@@ -28,18 +28,26 @@ const steps = [
 export function HowItWorks() {
   return (
     <section className="mx-auto max-w-6xl px-6 py-24">
-      <h2 className="text-center text-3xl font-bold">How it works</h2>
+      <h2 className="text-center text-3xl font-bold tracking-tight">
+        How it works
+      </h2>
       <p className="mx-auto mt-3 max-w-2xl text-center text-muted">
-        Three steps to give your AI agent access to testnet tokens.
+        Four steps to give your AI agent access to testnet tokens.
       </p>
-      <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-        {steps.map((step) => (
-          <div key={step.number} className="flex flex-col gap-3">
-            <span className="font-mono text-sm text-accent">
+
+      <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {steps.map((step, i) => (
+          <div
+            key={step.number}
+            className={`animate-in stagger-${i + 1} group rounded-xl border border-card-border bg-card p-6 transition-all duration-300 hover:border-[#2a2a2a] hover:shadow-[0_0_40px_rgba(240,185,11,0.03)]`}
+          >
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-accent/10 font-mono text-sm font-bold text-accent">
               {step.number}
             </span>
-            <h3 className="text-lg font-semibold">{step.title}</h3>
-            <p className="text-sm leading-relaxed text-muted">
+            <h3 className="mt-4 text-[15px] font-semibold leading-snug">
+              {step.title}
+            </h3>
+            <p className="mt-2 text-sm leading-relaxed text-muted">
               {step.description}
             </p>
           </div>
@@ -47,13 +55,13 @@ export function HowItWorks() {
       </div>
 
       {/* Code preview */}
-      <div className="mx-auto mt-16 max-w-2xl">
-        <div className="rounded-xl border border-card-border bg-card">
+      <div className="mx-auto mt-16 max-w-2xl animate-in stagger-5">
+        <div className="overflow-hidden rounded-xl border border-card-border bg-card transition-all duration-300 hover:border-[#2a2a2a]">
           <div className="flex items-center gap-2 border-b border-card-border px-4 py-3">
-            <div className="h-3 w-3 rounded-full bg-[#ff5f57]" />
-            <div className="h-3 w-3 rounded-full bg-[#febc2e]" />
-            <div className="h-3 w-3 rounded-full bg-[#28c840]" />
-            <span className="ml-2 font-mono text-xs text-muted">
+            <div className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
+            <div className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
+            <div className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
+            <span className="ml-2 font-mono text-xs text-muted/60">
               agent.py
             </span>
           </div>

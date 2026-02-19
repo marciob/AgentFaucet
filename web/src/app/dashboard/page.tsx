@@ -38,11 +38,10 @@ export default function DashboardPage() {
     "curl"
   );
   const supabase = createSupabaseBrowserClient();
-
-  const baseUrl =
-    typeof window !== "undefined" ? window.location.origin : "";
+  const [baseUrl, setBaseUrl] = useState("");
 
   useEffect(() => {
+    setBaseUrl(window.location.origin);
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user);
       if (data.user) {
@@ -87,17 +86,34 @@ export default function DashboardPage() {
     return (Number(wei) / 1e18).toFixed(4);
   }
 
+  // ── Not authenticated ────────────────────────────
   if (!user) {
     return (
-      <main className="mx-auto max-w-6xl px-6 py-16 text-center">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="mt-4 text-muted">
+      <main className="mx-auto flex max-w-6xl flex-col items-center px-6 py-32 text-center">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-card border border-card-border">
+          <svg
+            className="h-6 w-6 text-muted"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={1.5}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
+            />
+          </svg>
+        </div>
+        <h1 className="mt-6 text-2xl font-bold">Dashboard</h1>
+        <p className="mt-2 text-muted">
           Sign in with GitHub to access your dashboard.
         </p>
       </main>
     );
   }
 
+  // ── Code examples ────────────────────────────────
   const tokenPreview = profile?.jwt_token
     ? `${profile.jwt_token.slice(0, 40)}...`
     : "Loading...";
@@ -144,100 +160,132 @@ const data = await resp.json();
 console.log(data);
 // { success: true, txHash: "0x...", amount: "0.005", remaining: "0.01" }`;
 
-  return (
-    <main className="mx-auto max-w-6xl px-6 py-16">
-      <h1 className="text-3xl font-bold">Dashboard</h1>
-      <p className="mt-2 text-muted">
-        Welcome back,{" "}
-        {profile?.github_username || user.user_metadata?.user_name}
-      </p>
+  const tabs = ["curl", "python", "node"] as const;
 
-      {/* Stats */}
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          label="Reputation score"
-          value={profile ? `${profile.reputation_score}/100` : "..."}
-        />
-        <StatCard
-          label="Tier"
-          value={
-            profile
-              ? `${profile.tier} — ${TIER_NAMES[profile.tier]}`
-              : "..."
-          }
-        />
-        <StatCard
-          label="Daily limit"
-          value={
-            profile ? `${formatWei(profile.daily_limit_wei)} tBNB` : "..."
-          }
-        />
-        <StatCard
-          label="ERC-8004 ID"
-          value={
-            profile?.agent_token_id ? `#${profile.agent_token_id}` : "Pending"
-          }
-        />
+  const tierRows = [
+    { tier: 1, name: "Newcomer", range: "0 – 20", limit: "0.005" },
+    { tier: 2, name: "Developer", range: "21 – 50", limit: "0.01" },
+    { tier: 3, name: "Active Builder", range: "51 – 80", limit: "0.015" },
+    { tier: 4, name: "Established", range: "81 – 100", limit: "0.02" },
+  ];
+
+  // ── Authenticated ────────────────────────────────
+  return (
+    <main className="mx-auto max-w-6xl px-6 py-12 sm:py-16">
+      {/* Header */}
+      <div className="animate-in">
+        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <p className="mt-1.5 text-muted">
+          Welcome back,{" "}
+          {profile?.github_username || user.user_metadata?.user_name}
+        </p>
       </div>
 
-      {/* Quick Start Guide */}
-      <section className="mt-12 rounded-xl border border-card-border bg-card p-6">
-        <h2 className="text-lg font-semibold">Quick start — connect your AI agent</h2>
+      {/* ── Stats Grid ──────────────────────────────── */}
+      <div className="mt-8 grid gap-4 grid-cols-2 lg:grid-cols-4">
+        <div className="animate-in stagger-1">
+          <StatCard
+            label="Reputation"
+            value={profile ? `${profile.reputation_score}/100` : "..."}
+          />
+        </div>
+        <div className="animate-in stagger-2">
+          <StatCard
+            label="Tier"
+            value={
+              profile
+                ? `${profile.tier} — ${TIER_NAMES[profile.tier]}`
+                : "..."
+            }
+          />
+        </div>
+        <div className="animate-in stagger-3">
+          <StatCard
+            label="Daily limit"
+            value={
+              profile ? `${formatWei(profile.daily_limit_wei)} tBNB` : "..."
+            }
+          />
+        </div>
+        <div className="animate-in stagger-4">
+          <StatCard
+            label="ERC-8004 ID"
+            value={
+              profile?.agent_token_id
+                ? `#${profile.agent_token_id}`
+                : "Pending"
+            }
+          />
+        </div>
+      </div>
+
+      {/* ── Quick Start ─────────────────────────────── */}
+      <section className="mt-12 animate-in stagger-5 rounded-xl border border-card-border bg-card p-5 sm:p-6">
+        <h2 className="text-lg font-semibold tracking-tight">
+          Quick start — connect your AI agent
+        </h2>
         <p className="mt-1 text-sm text-muted">
           Follow these steps to let your agent claim testnet tBNB automatically.
         </p>
 
         {/* Step 1 — Copy token */}
-        <div className="mt-6">
-          <div className="flex items-center gap-2">
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-bold text-black">
+        <div className="mt-8">
+          <div className="flex items-center gap-3">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-accent text-xs font-bold text-black">
               1
             </span>
-            <h3 className="text-sm font-semibold">
-              Copy your agent token
-            </h3>
+            <h3 className="text-sm font-semibold">Copy your agent token</h3>
           </div>
-          <div className="mt-3 ml-8 flex items-center gap-3">
+          <div className="mt-3 ml-10 flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="flex-1 overflow-hidden rounded-lg border border-card-border bg-background px-4 py-3 font-mono text-sm text-muted">
               {tokenPreview}
             </div>
             <button
               onClick={copyToken}
               disabled={!profile?.jwt_token}
-              className="rounded-lg bg-accent px-4 py-3 text-sm font-medium text-black transition-colors hover:bg-accent-hover disabled:opacity-50"
+              className={`shrink-0 rounded-lg px-4 py-3 text-sm font-medium transition-all sm:py-2.5 ${
+                copied
+                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
+                  : "bg-accent text-black hover:bg-accent-hover disabled:opacity-50"
+              }`}
             >
-              {copied ? "Copied!" : "Copy"}
+              {copied ? "Copied!" : "Copy token"}
             </button>
           </div>
         </div>
 
         {/* Step 2 — Set env var */}
-        <div className="mt-6">
-          <div className="flex items-center gap-2">
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-bold text-black">
+        <div className="mt-8">
+          <div className="flex items-center gap-3">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-accent text-xs font-bold text-black">
               2
             </span>
             <h3 className="text-sm font-semibold">
               Set it as an environment variable
             </h3>
           </div>
-          <div className="group relative mt-3 ml-8 rounded-lg border border-card-border bg-background p-4">
+          <div className="group relative mt-3 ml-10 rounded-lg border border-card-border bg-background p-4">
             <button
-              onClick={() => copyText(`export FAUCET_TOKEN="your_token_here"`)}
-              className="absolute right-3 top-3 rounded border border-card-border px-2 py-1 text-xs text-muted opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100"
+              onClick={() =>
+                copyText(`export FAUCET_TOKEN="your_token_here"`)
+              }
+              className="absolute right-3 top-3 rounded-md border border-card-border bg-card px-2.5 py-1 text-xs text-muted opacity-0 transition-all hover:text-foreground group-hover:opacity-100"
             >
               Copy
             </button>
             <pre className="overflow-x-auto font-mono text-sm text-foreground">
-              <span className="text-muted">export</span> FAUCET_TOKEN=<span className="text-accent">&quot;your_token_here&quot;</span>
+              <span className="text-muted">export</span> FAUCET_TOKEN=
+              <span className="text-accent">
+                &quot;your_token_here&quot;
+              </span>
             </pre>
           </div>
         </div>
 
         {/* Step 3 — Make API calls */}
-        <div className="mt-6">
-          <div className="flex items-center gap-2">
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-bold text-black">
+        <div className="mt-8">
+          <div className="flex items-center gap-3">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-accent text-xs font-bold text-black">
               3
             </span>
             <h3 className="text-sm font-semibold">
@@ -246,9 +294,9 @@ console.log(data);
           </div>
 
           {/* Language tabs */}
-          <div className="mt-3 ml-8">
-            <div className="flex gap-1 rounded-lg border border-card-border bg-background p-1">
-              {(["curl", "python", "node"] as const).map((tab) => (
+          <div className="mt-3 ml-10">
+            <div className="inline-flex gap-1 rounded-lg border border-card-border bg-background p-1">
+              {tabs.map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -278,7 +326,7 @@ console.log(data);
                       : nodeExample
                   )
                 }
-                className="absolute right-3 top-3 rounded border border-card-border px-2 py-1 text-xs text-muted opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100"
+                className="absolute right-3 top-3 rounded-md border border-card-border bg-card px-2.5 py-1 text-xs text-muted opacity-0 transition-all hover:text-foreground group-hover:opacity-100"
               >
                 Copy
               </button>
@@ -292,63 +340,73 @@ console.log(data);
         </div>
       </section>
 
-      {/* API Reference */}
-      <section className="mt-8 rounded-xl border border-card-border bg-card p-6">
-        <h2 className="text-lg font-semibold">API Reference</h2>
-        <div className="mt-4 space-y-4">
-          <div className="rounded-lg border border-card-border bg-background p-4">
+      {/* ── API Reference ───────────────────────────── */}
+      <section className="mt-8 rounded-xl border border-card-border bg-card p-5 sm:p-6">
+        <h2 className="text-lg font-semibold tracking-tight">API Reference</h2>
+
+        <div className="mt-5 space-y-3">
+          <div className="rounded-lg border border-card-border bg-background p-4 transition-colors hover:border-[#2a2a2a]">
             <div className="flex items-center gap-2">
-              <span className="rounded bg-green-900/50 px-2 py-0.5 font-mono text-xs font-bold text-green-400">
+              <span className="rounded-md bg-green-900/50 px-2 py-0.5 font-mono text-xs font-bold text-green-400">
                 POST
               </span>
               <code className="font-mono text-sm">/api/claim</code>
             </div>
             <p className="mt-2 text-sm text-muted">
-              Claim tBNB to any wallet. The relayer sends the transaction — your agent never needs gas.
+              Claim tBNB to any wallet. The relayer sends the transaction — your
+              agent never needs gas.
             </p>
-            <div className="mt-3 grid gap-2 text-sm">
+            <div className="mt-3 grid gap-1.5 text-sm">
               <div className="flex gap-2">
                 <code className="shrink-0 text-accent">walletAddress</code>
-                <span className="text-muted">— Recipient 0x address (required)</span>
+                <span className="text-muted">
+                  — Recipient 0x address (required)
+                </span>
               </div>
               <div className="flex gap-2">
                 <code className="shrink-0 text-accent">amount</code>
-                <span className="text-muted">— tBNB amount as string, e.g. &quot;0.005&quot; (optional, defaults to 0.005)</span>
+                <span className="text-muted">
+                  — tBNB amount as string, e.g. &quot;0.005&quot; (optional)
+                </span>
               </div>
             </div>
           </div>
 
-          <div className="rounded-lg border border-card-border bg-background p-4">
+          <div className="rounded-lg border border-card-border bg-background p-4 transition-colors hover:border-[#2a2a2a]">
             <div className="flex items-center gap-2">
-              <span className="rounded bg-blue-900/50 px-2 py-0.5 font-mono text-xs font-bold text-blue-400">
+              <span className="rounded-md bg-blue-900/50 px-2 py-0.5 font-mono text-xs font-bold text-blue-400">
                 GET
               </span>
               <code className="font-mono text-sm">/api/status</code>
             </div>
             <p className="mt-2 text-sm text-muted">
-              Check your tier, daily limit, amount claimed today, and remaining allocation.
+              Check your tier, daily limit, amount claimed today, and remaining
+              allocation.
             </p>
           </div>
 
-          <div className="rounded-lg border border-card-border bg-background p-4">
+          <div className="rounded-lg border border-card-border bg-background p-4 transition-colors hover:border-[#2a2a2a]">
             <div className="flex items-center gap-2">
-              <span className="rounded bg-blue-900/50 px-2 py-0.5 font-mono text-xs font-bold text-blue-400">
+              <span className="rounded-md bg-blue-900/50 px-2 py-0.5 font-mono text-xs font-bold text-blue-400">
                 GET
               </span>
               <code className="font-mono text-sm">/api/stats</code>
             </div>
             <p className="mt-2 text-sm text-muted">
-              Public endpoint — pool balance, total claims, unique developers. No auth required.
+              Public endpoint — pool balance, total claims, unique developers.
+              No auth required.
             </p>
           </div>
         </div>
 
         {/* Check status example */}
         <div className="group relative mt-4 rounded-lg border border-card-border bg-background p-4">
-          <div className="mb-2 text-xs font-medium text-muted">Check your remaining allocation</div>
+          <div className="mb-2 text-xs font-medium text-muted">
+            Check your remaining allocation
+          </div>
           <button
             onClick={() => copyText(curlStatus)}
-            className="absolute right-3 top-3 rounded border border-card-border px-2 py-1 text-xs text-muted opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100"
+            className="absolute right-3 top-3 rounded-md border border-card-border bg-card px-2.5 py-1 text-xs text-muted opacity-0 transition-all hover:text-foreground group-hover:opacity-100"
           >
             Copy
           </button>
@@ -358,41 +416,37 @@ console.log(data);
         </div>
       </section>
 
-      {/* Tier table */}
-      <section className="mt-8 rounded-xl border border-card-border bg-card p-6">
-        <h2 className="text-lg font-semibold">Tier system</h2>
+      {/* ── Tier System ─────────────────────────────── */}
+      <section className="mt-8 rounded-xl border border-card-border bg-card p-5 sm:p-6">
+        <h2 className="text-lg font-semibold tracking-tight">Tier system</h2>
         <p className="mt-1 text-sm text-muted">
-          Your daily limit is based on your GitHub reputation score. Resets at UTC midnight.
+          Your daily limit is based on your GitHub reputation score. Resets at
+          UTC midnight.
         </p>
-        <div className="mt-4 overflow-hidden rounded-lg border border-card-border">
+
+        {/* Desktop table */}
+        <div className="mt-5 hidden overflow-hidden rounded-lg border border-card-border sm:block">
           <table className="w-full text-sm">
             <thead className="bg-background text-left text-muted">
               <tr>
-                <th className="px-4 py-3">Tier</th>
-                <th className="px-4 py-3">Score range</th>
-                <th className="px-4 py-3">Daily limit</th>
+                <th className="px-4 py-3 font-medium">Tier</th>
+                <th className="px-4 py-3 font-medium">Score range</th>
+                <th className="px-4 py-3 font-medium">Daily limit</th>
               </tr>
             </thead>
             <tbody>
-              {[
-                { tier: 1, name: "Newcomer", range: "0–20", limit: "0.005" },
-                { tier: 2, name: "Developer", range: "21–50", limit: "0.01" },
-                { tier: 3, name: "Active Builder", range: "51–80", limit: "0.015" },
-                { tier: 4, name: "Established", range: "81–100", limit: "0.02" },
-              ].map((row) => (
+              {tierRows.map((row) => (
                 <tr
                   key={row.tier}
-                  className={`border-t border-card-border ${
+                  className={`border-t border-card-border transition-colors ${
                     profile?.tier === row.tier ? "bg-accent/5" : ""
                   }`}
                 >
                   <td className="px-4 py-3">
-                    <span className="font-medium">
-                      {row.tier}
-                    </span>
+                    <span className="font-medium">{row.tier}</span>
                     <span className="ml-2 text-muted">{row.name}</span>
                     {profile?.tier === row.tier && (
-                      <span className="ml-2 rounded-full bg-accent/20 px-2 py-0.5 text-xs text-accent">
+                      <span className="ml-2 rounded-full bg-accent/20 px-2 py-0.5 text-xs font-medium text-accent">
                         You
                       </span>
                     )}
@@ -400,64 +454,151 @@ console.log(data);
                   <td className="px-4 py-3 font-mono text-muted">
                     {row.range}
                   </td>
-                  <td className="px-4 py-3 font-mono">
-                    {row.limit} tBNB
-                  </td>
+                  <td className="px-4 py-3 font-mono">{row.limit} tBNB</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+
+        {/* Mobile cards */}
+        <div className="mt-5 space-y-3 sm:hidden">
+          {tierRows.map((row) => (
+            <div
+              key={row.tier}
+              className={`rounded-lg border p-4 ${
+                profile?.tier === row.tier
+                  ? "border-accent/30 bg-accent/5"
+                  : "border-card-border bg-background"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-md bg-card-border text-xs font-bold">
+                    {row.tier}
+                  </span>
+                  <span className="font-medium text-sm">{row.name}</span>
+                  {profile?.tier === row.tier && (
+                    <span className="rounded-full bg-accent/20 px-2 py-0.5 text-[11px] font-medium text-accent">
+                      You
+                    </span>
+                  )}
+                </div>
+                <span className="font-mono text-sm font-medium">
+                  {row.limit} tBNB
+                </span>
+              </div>
+              <p className="mt-1.5 text-xs text-muted">
+                Score: {row.range}
+              </p>
+            </div>
+          ))}
+        </div>
       </section>
 
-      {/* Recent claims */}
+      {/* ── Recent Claims ───────────────────────────── */}
       <section className="mt-8">
-        <h2 className="text-lg font-semibold">Recent claims</h2>
+        <h2 className="text-lg font-semibold tracking-tight">Recent claims</h2>
+
         {claims.length > 0 ? (
-          <div className="mt-4 overflow-hidden rounded-xl border border-card-border">
-            <table className="w-full text-sm">
-              <thead className="bg-card text-left text-muted">
-                <tr>
-                  <th className="px-4 py-3">Wallet</th>
-                  <th className="px-4 py-3">Amount</th>
-                  <th className="px-4 py-3">Tx Hash</th>
-                  <th className="px-4 py-3">Time</th>
-                </tr>
-              </thead>
-              <tbody>
-                {claims.map((claim) => (
-                  <tr
-                    key={claim.id}
-                    className="border-t border-card-border"
-                  >
-                    <td className="px-4 py-3 font-mono">
+          <>
+            {/* Desktop table */}
+            <div className="mt-4 hidden overflow-hidden rounded-xl border border-card-border sm:block">
+              <table className="w-full text-sm">
+                <thead className="bg-card text-left text-muted">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">Wallet</th>
+                    <th className="px-4 py-3 font-medium">Amount</th>
+                    <th className="px-4 py-3 font-medium">Tx Hash</th>
+                    <th className="px-4 py-3 font-medium">Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {claims.map((claim) => (
+                    <tr
+                      key={claim.id}
+                      className="border-t border-card-border transition-colors hover:bg-card/50"
+                    >
+                      <td className="px-4 py-3 font-mono">
+                        {claim.wallet_address.slice(0, 6)}...
+                        {claim.wallet_address.slice(-4)}
+                      </td>
+                      <td className="px-4 py-3">
+                        {formatWei(claim.amount_wei)} tBNB
+                      </td>
+                      <td className="px-4 py-3">
+                        <a
+                          href={`https://testnet.bscscan.com/tx/${claim.tx_hash}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-mono text-accent hover:underline"
+                        >
+                          {claim.tx_hash.slice(0, 10)}...
+                        </a>
+                      </td>
+                      <td className="px-4 py-3 text-muted">
+                        {new Date(claim.created_at).toLocaleString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile cards */}
+            <div className="mt-4 space-y-3 sm:hidden">
+              {claims.map((claim) => (
+                <div
+                  key={claim.id}
+                  className="rounded-xl border border-card-border bg-card p-4"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-sm">
                       {claim.wallet_address.slice(0, 6)}...
                       {claim.wallet_address.slice(-4)}
-                    </td>
-                    <td className="px-4 py-3">
+                    </span>
+                    <span className="text-sm font-medium">
                       {formatWei(claim.amount_wei)} tBNB
-                    </td>
-                    <td className="px-4 py-3">
-                      <a
-                        href={`https://testnet.bscscan.com/tx/${claim.tx_hash}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-mono text-accent hover:underline"
-                      >
-                        {claim.tx_hash.slice(0, 10)}...
-                      </a>
-                    </td>
-                    <td className="px-4 py-3 text-muted">
-                      {new Date(claim.created_at).toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    </span>
+                  </div>
+                  <div className="mt-2 flex items-center justify-between text-xs text-muted">
+                    <a
+                      href={`https://testnet.bscscan.com/tx/${claim.tx_hash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-mono text-accent hover:underline"
+                    >
+                      {claim.tx_hash.slice(0, 10)}...
+                    </a>
+                    <span>
+                      {new Date(claim.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         ) : (
-          <div className="mt-4 rounded-xl border border-card-border bg-card p-8 text-center text-sm text-muted">
-            No claims yet. Use the API above to start claiming tBNB.
+          <div className="mt-4 flex flex-col items-center rounded-xl border border-card-border bg-card py-12 px-6 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-card-border/50">
+              <svg
+                className="h-5 w-5 text-muted"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+                />
+              </svg>
+            </div>
+            <p className="mt-4 text-sm font-medium">No claims yet</p>
+            <p className="mt-1 text-sm text-muted">
+              Use the API above to start claiming tBNB.
+            </p>
           </div>
         )}
       </section>
