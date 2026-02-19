@@ -214,7 +214,7 @@ export default function DashboardPage() {
               </div>
               <button
                 onClick={() => {
-                  const text = `Read ${baseUrl}/agents.md and follow the instructions to claim tBNB`;
+                  const text = `Read ${baseUrl}/agents.md and save it as a skill, then follow the instructions to claim tBNB`;
                   navigator.clipboard.writeText(text);
                   setCopied(true);
                   setTimeout(() => setCopied(false), 2000);
@@ -250,8 +250,7 @@ export default function DashboardPage() {
                   )}
                 </span>
                 <p className="font-mono text-sm leading-relaxed text-foreground/80">
-                  Read {baseUrl}/agents.md and follow the instructions to claim
-                  tBNB
+                  Read {baseUrl}/agents.md and save it as a skill, then follow the instructions to claim tBNB
                 </p>
               </button>
             </div>
