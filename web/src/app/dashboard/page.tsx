@@ -40,6 +40,7 @@ export default function DashboardPage() {
   const [copied, setCopied] = useState(false);
   const [minting, setMinting] = useState(false);
   const [mintError, setMintError] = useState<string | null>(null);
+  const [regenerating, setRegenerating] = useState(false);
   const supabase = createSupabaseBrowserClient();
   const [baseUrl, setBaseUrl] = useState("");
 
@@ -90,6 +91,19 @@ export default function DashboardPage() {
       navigator.clipboard.writeText(profile.jwt_token);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    }
+  }
+
+  async function regenerateToken() {
+    setRegenerating(true);
+    try {
+      const res = await fetch("/api/token/regenerate", { method: "POST" });
+      if (!res.ok) throw new Error("Failed to regenerate");
+      if (user) await loadProfile(user.id);
+    } catch (err) {
+      console.error("Regenerate failed:", err);
+    } finally {
+      setRegenerating(false);
     }
   }
 
@@ -403,17 +417,26 @@ export default function DashboardPage() {
               <div className="flex-1 overflow-hidden rounded-lg border border-card-border bg-background px-4 py-3 font-mono text-sm text-muted">
                 {tokenPreview}
               </div>
-              <button
-                onClick={copyToken}
-                disabled={!profile?.jwt_token}
-                className={`shrink-0 rounded-lg px-5 py-3 text-sm font-medium transition-all sm:py-2.5 ${
-                  copied
-                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
-                    : "bg-accent text-black hover:bg-accent-hover disabled:opacity-50"
-                }`}
-              >
-                {copied ? "Copied!" : "Copy token"}
-              </button>
+              <div className="flex gap-2 shrink-0">
+                <button
+                  onClick={copyToken}
+                  disabled={!profile?.jwt_token}
+                  className={`rounded-lg px-5 py-3 text-sm font-medium transition-all sm:py-2.5 ${
+                    copied
+                      ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
+                      : "bg-accent text-black hover:bg-accent-hover disabled:opacity-50"
+                  }`}
+                >
+                  {copied ? "Copied!" : "Copy token"}
+                </button>
+                <button
+                  onClick={regenerateToken}
+                  disabled={regenerating}
+                  className="rounded-lg border border-card-border px-4 py-3 text-sm font-medium text-muted transition-colors hover:border-[#333] hover:text-foreground disabled:opacity-50 sm:py-2.5"
+                >
+                  {regenerating ? "Regenerating..." : "Regenerate"}
+                </button>
+              </div>
             </div>
           </section>
 
