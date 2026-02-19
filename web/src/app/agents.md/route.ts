@@ -75,7 +75,7 @@ curl -s "${baseUrl}/api/stats"
 | Status | Meaning | What to do |
 |--------|---------|------------|
 | 400 | Invalid address | Check the wallet address format (must be 0x + 40 hex chars) |
-| 401 | Invalid/expired token | Ask user to re-authenticate at the dashboard |
+| 401 | Invalid/expired token | Ask user to go to the dashboard and click **Regenerate** to get a new token |
 | 404 | Profile not found | Ask user to sign in via GitHub OAuth first |
 | 429 | Daily limit reached | Show remaining limit, tell user to wait until UTC midnight |
 | 500 | Server error | Retry once, then report the error |
@@ -86,6 +86,7 @@ curl -s "${baseUrl}/api/stats"
 - Never log or expose WALLET_PRIVATE_KEY in output
 - Store secrets in .env with chmod 600 permissions
 - Tokens expire after 30 days
+- If a token is leaked or compromised, the user can regenerate it at ${baseUrl}/dashboard — the old token is immediately invalidated
 `;
 
   return new Response(markdown, {
