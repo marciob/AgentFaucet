@@ -354,14 +354,21 @@ export default function DashboardPage() {
               />
             </div>
             <div className="animate-in stagger-4">
-              <StatCard
-                label="ERC-8004 ID"
-                value={
-                  profile?.agent_token_id != null
-                    ? `#${profile.agent_token_id}`
-                    : "Not minted"
-                }
-              />
+              {profile?.agent_token_id != null ? (
+                <a
+                  href={`https://testnet.bscscan.com/nft/0x8004A818BFB912233c491871b3d84c89A494BD9e/${profile.agent_token_id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block transition-opacity hover:opacity-80"
+                >
+                  <StatCard
+                    label="ERC-8004 ID"
+                    value={`#${profile.agent_token_id}`}
+                  />
+                </a>
+              ) : (
+                <StatCard label="ERC-8004 ID" value="Not minted" />
+              )}
             </div>
           </div>
 
