@@ -197,16 +197,18 @@ console.log(data);
 
         {/* Audience Toggle */}
         <div className="relative mt-6 inline-flex rounded-full border border-card-border/60 bg-card/80 p-1 backdrop-blur-sm">
-          <div
-            className="absolute top-1 bottom-1 rounded-full bg-accent transition-all duration-300 ease-out"
-            style={{ left: pill.left, width: pill.width }}
-          />
+          {pill.width > 0 && (
+            <div
+              className="absolute top-1 bottom-1 rounded-full bg-accent transition-all duration-300 ease-out"
+              style={{ left: pill.left, width: pill.width }}
+            />
+          )}
           <button
             ref={agentRef}
             onClick={() => setAudience("agent")}
             className={`relative z-10 rounded-full px-5 py-2 text-sm font-medium transition-colors duration-300 sm:px-6 sm:py-2.5 ${
               audience === "agent"
-                ? "text-black"
+                ? pill.width > 0 ? "text-black" : "bg-accent text-black"
                 : "text-muted hover:text-foreground"
             }`}
           >
@@ -217,7 +219,7 @@ console.log(data);
             onClick={() => setAudience("human")}
             className={`relative z-10 rounded-full px-5 py-2 text-sm font-medium transition-colors duration-300 sm:px-6 sm:py-2.5 ${
               audience === "human"
-                ? "text-black"
+                ? pill.width > 0 ? "text-black" : "bg-accent text-black"
                 : "text-muted hover:text-foreground"
             }`}
           >
