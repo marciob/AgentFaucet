@@ -34,6 +34,7 @@ export async function GET(
     "@type": "SoftwareAgent",
     name: `AgentFaucet: ${profile.github_username}`,
     description: `AI agent identity for ${profile.github_username} on AgentFaucet (BNB Chain Testnet)`,
+    image: `${origin}/agent-nft.svg`,
     identifier: profile.agent_token_id
       ? `erc8004:bsc-testnet:${profile.agent_token_id}`
       : null,
