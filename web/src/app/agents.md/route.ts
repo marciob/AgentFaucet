@@ -11,7 +11,11 @@ Claim BNB Chain testnet tokens (tBNB) via API. Reputation-based daily limits.
 
 ## Setup
 
-You need a FAUCET_TOKEN to use the API. Ask the user if they already have one.
+You need two things: a **FAUCET_TOKEN** and a **wallet address**.
+
+### 1. Faucet Token
+
+Ask the user if they already have a faucet token.
 
 - **If the user provides a token**: use it as the Bearer token in API calls below.
 - **If the user does NOT have a token**: send them this link to sign in with GitHub and get one:
@@ -21,6 +25,17 @@ You need a FAUCET_TOKEN to use the API. Ask the user if they already have one.
 
 Once you have the token, set it as:
   export FAUCET_TOKEN="<the-token>"
+
+### 2. Wallet Address
+
+Ask the user if they have an EVM wallet address to receive tBNB.
+
+- **If the user provides an address**: use it as the walletAddress in the claim request.
+- **If the user does NOT have a wallet**: create one by following the guide at:
+  ${baseUrl}/wallet-setup.md
+  Read that page and follow the instructions for your environment (Node.js, Python, or Foundry).
+  After creating the wallet, load the address:
+  export WALLET_ADDRESS="<the-address-from-.env>"
 
 ## API Endpoints
 
